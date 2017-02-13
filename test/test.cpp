@@ -35,12 +35,12 @@ bool test_aquire() {
 
     for (int i = 0; i < 20; i++)
     {
-        long token_num = limiter->aquire();
+        limiter->aquire();
     }
 
     long long end = GET_TIME;
 
-    double error = ((end - start) - 2000) /  2000;
+    double error = ((end - start) - 2000) * 1.0 /  2000;
 
     return std::abs(error) < TOLERANCE;
 }
@@ -104,7 +104,7 @@ bool test_try_aquire() {
     assert(limiter->try_aquire(1, 2000));
 
     long long end = GET_TIME;
-    double error = ((end - start) - 2000) / 2000;
+    double error = ((end - start) - 2000) * 1.0 / 2000;
 
     return std::abs(error) < TOLERANCE;
 }
@@ -123,7 +123,7 @@ bool test_rate() {
     limiter->aquire();
 
     long long end = GET_TIME;
-    double first_error = ((end - start) - 1000) / 1000;
+    double first_error = ((end - start) - 1000) * 1.0 / 1000;
 
     limiter->set_rate(0.5);
     assert(limiter->get_rate() == 0.5);
@@ -171,13 +171,13 @@ bool test_concurrent() {
     //       to be synchronous.
     std::future<bool> results[1000];
 
-    long start = GET_TIME;
+    long long start = GET_TIME;
     for (int i = 0; i < 1000; i++)
         results[i] = std::async(std::launch::async, [limiter]() { limiter->aquire(); return true; });
 
     for (int i = 0; i < 1000; i++)
         assert(results[i].get());
-    long end = GET_TIME;
+    long long end = GET_TIME;
 
     double error = ((end - start) - 10000.0) / 10000.0;
 
@@ -202,15 +202,12 @@ int main() {
     using namespace std::chrono;
 
     RateLimiterInterface* limiter = new RateLimiter();
-    limiter->set_rate(100.0);
+    limiter->set_rate(2);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 1000; i++)
     {
         long token_num = limiter->aquire();
-        for (size_t i = 0; i < token_num; i++)
-        {
-            printf("token %ld: %lld\n", i, GET_TIME);
-        }
+        printf("%04d. token %04ld: %llu\n", i, token_num, GET_TIME);
     }
 
     int failed = 0;
@@ -230,8 +227,6 @@ int main() {
         cout << endl;
     }
 #endif
-
-    cin.get();
-
+    
     return failed;
 }

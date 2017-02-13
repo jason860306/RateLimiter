@@ -5,7 +5,8 @@
 
 #include "rate_limiter.hpp"
 
-RateLimiter::RateLimiter() : interval_(0), max_permits_(0), stored_permits_(0), next_free_(0) {
+RateLimiter::RateLimiter()
+    : interval_(0), max_permits_(0), stored_permits_(0), next_free_(0) {
 }
 long RateLimiter::aquire() {
     return aquire(1);
@@ -46,12 +47,12 @@ void RateLimiter::sync(unsigned long long now) {
     // stored permits, and update next_free_
     if (now > next_free_) {
         /**
-         * å–å½“å‰ä»¤ç‰Œæ¡¶é‡Œçš„ä»¤ç‰Œæ•°ï¼Œä¸èƒ½å¤§äºä»¤ç‰Œæ¡¶çš„å®¹é‡
-         * (now - next_free_) / interval_: æ—¶é—´æ®µ(now - next_free_)å†…æ–°äº§ç”Ÿçš„ä»¤ç‰Œæ•°
-         * stored_permits_ + (now - next_free_) / interval_: å½“å‰ä»¤ç‰Œæ¡¶å†…å‰©ä½™åŠæ–°äº§ç”Ÿçš„ä»¤ç‰Œæ•°
+         * È¡µ±Ç°ÁîÅÆÍ°ÀïµÄÁîÅÆÊı£¬²»ÄÜ´óÓÚÁîÅÆÍ°µÄÈİÁ¿
+         * (now - next_free_) / interval_: Ê±¼ä¶Î(now - next_free_)ÄÚĞÂ²úÉúµÄÁîÅÆÊı
+         * stored_permits_ + (now - next_free_) / interval_: µ±Ç°ÁîÅÆÍ°ÄÚÊ£Óà¼°ĞÂ²úÉúµÄÁîÅÆÊı
          */
         stored_permits_ = std::min(max_permits_, stored_permits_ + (now - next_free_) / interval_);
-        next_free_ = now; ///< é‡ç½®ç”Ÿæˆä»¤ç‰Œçš„å¼€å§‹æ—¶é—´
+        next_free_ = now; ///< ÖØÖÃÉú³ÉÁîÅÆµÄ¿ªÊ¼Ê±¼ä
     }
 }
 std::chrono::microseconds RateLimiter::claim_next(double permits) {
@@ -65,18 +66,18 @@ std::chrono::microseconds RateLimiter::claim_next(double permits) {
     sync(now);
 
     // Since we synced before hand, this will always be >= 0.
-    unsigned long long wait = next_free_ - now; ///< åˆ°äº§ç”Ÿä»¤ç‰Œçš„èµ·å§‹æ—¶é—´æ‰€éœ€è¦ç­‰å¾…çš„æ—¶é—´
+    unsigned long long wait = next_free_ - now; ///< µ½²úÉúÁîÅÆµÄÆğÊ¼Ê±¼äËùĞèÒªµÈ´ıµÄÊ±¼ä
 
     // Determine how many stored and freh permits to consume
-    double stored = std::min(permits, stored_permits_); ///< å½“å‰å®é™…éœ€è¦ä¸”å¯ç”¨çš„ä»¤ç‰Œæ•°
-    double fresh = permits - stored; ///< å½“å‰ä»¤ç‰Œæ¡¶å†…ä¸è¶³ä½†å®é™…éœ€è¦è€Œéœ€è¦æ–°äº§ç”Ÿçš„ä»¤ç‰Œæ•°
+    double stored = std::min(permits, stored_permits_); ///< µ±Ç°Êµ¼ÊĞèÒªÇÒ¿ÉÓÃµÄÁîÅÆÊı
+    double fresh = permits - stored; ///< µ±Ç°ÁîÅÆÍ°ÄÚ²»×ãµ«Êµ¼ÊĞèÒª¶øĞèÒªĞÂ²úÉúµÄÁîÅÆÊı
 
     // In the general RateLimiter, stored permits have no wait time,
     // and thus we only have to wait for however many fresh permits we consume
-    long next_free = (long)(fresh * interval_); ///< å°†ä¸è¶³çš„ä»¤ç‰Œæ•°è½¬æ¢æˆæ—¶é—´æˆ³
+    long next_free = (long)(fresh * interval_); ///< ÓÃÁîÅÆÉú³ÉËÙÂÊ½«²»×ãµÄÁîÅÆÊı×ª»»³ÉÊ±¼ä´Á
 
     next_free_ += next_free;
-    stored_permits_ -= stored; ///< æ¶ˆè€—æ‰storedä¸ªä»¤ç‰Œ
+    stored_permits_ -= stored; ///< ÏûºÄµôstored¸öÁîÅÆ
 
     return microseconds(wait);
 }
@@ -90,9 +91,9 @@ void RateLimiter::set_rate(double rate) {
     }
 
     /**
-     * ç”Ÿæˆä»¤ç‰Œçš„é€Ÿç‡å•ä½å€¼
-     * interval_: ç§’/ä¸ª
-     * rate: ä¸ª/ç§’
+     * Éú³ÉÁîÅÆµÄËÙÂÊµ¥Î»Öµ
+     * interval_: Ãë/¸ö
+     * rate: ¸ö/Ãë
      */
     std::lock_guard<std::mutex> lock(mut_);
     interval_ = 1000000.0 / rate;

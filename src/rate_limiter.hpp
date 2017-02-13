@@ -19,11 +19,11 @@ private:
     void sync(unsigned long long now);
     std::chrono::microseconds claim_next(double permits);
 private:
-    double interval_;               ///< ç”Ÿæˆä»¤ç‰Œçš„é€ŸçŽ‡ï¼Œå³é™é€Ÿçš„é€ŸçŽ‡å€¼ï¼Œå•ä½ï¼šç§’/ä¸ª
-    double max_permits_;            ///< ä»¤ç‰Œæ¡¶å®¹é‡
-    double stored_permits_;         ///< å½“å‰ä»¤ç‰Œæ¡¶å†…çš„ä»¤ç‰Œæ•°
+    double interval_;               ///< Éú³ÉÁîÅÆµÄËÙÂÊ£¬¼´ÏÞËÙµÄËÙÂÊÖµ£¬µ¥Î»£ºÃë/¸ö
+    double max_permits_;            ///< ÁîÅÆÍ°ÈÝÁ¿
+    double stored_permits_;         ///< µ±Ç°ÁîÅÆÍ°ÄÚµÄÁîÅÆÊý
 
-    unsigned long long next_free_;  ///< ç”Ÿæˆä»¤ç‰Œçš„å¼€å§‹æ—¶é—´
+    unsigned long long next_free_;  ///< Éú³ÉÁîÅÆµÄ¿ªÊ¼Ê±¼ä
 
     std::mutex mut_;
 };
